@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wzy.yeb.mapper.DepartmentMapper">
+
+    <resultMap id="BaseResultMap" type="com.wzy.yeb.pojo.Department">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="parentId" column="parentId" jdbcType="INTEGER"/>
+            <result property="depPath" column="depPath" jdbcType="VARCHAR"/>
+            <result property="enabled" column="enabled" jdbcType="TINYINT"/>
+            <result property="isParent" column="isParent" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <resultMap id="DepartmentWithChildren"
+               type="com.wzy.yeb.pojo.Department" extends="BaseResultMap">
+        <collection property="children" ofType="com.wzy.yeb.pojo.Department"
+                    select="com.wzy.yeb.mapper.DepartmentMapper.getAllDepartmentsByParentId"
+                    column="id">
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,parentId,
+        depPath,enabled,isParent
+    </sql>
+
+    <!--添加部门-->
+    <select id="addDep" statementType="CALLABLE">
+        call addDep(#{name,mode=IN,jdbcType=VARCHAR},#{parentId,mode=IN,jdbcType=INTEGER},
+            #{enabled,mode=IN,jdbcType=BOOLEAN},#{result,mode=OUT,jdbcType=INTEGER},#{id,mode=OUT,jdbcType=INTEGER})
+    </select>
+
+    <!--删除部门-->
+    <select id="deleteDep" statementType="CALLABLE">
+        call deleteDep(#{id,mode=IN,jdbcType=INTEGER},#{result,mode=OUT,jdbcType=INTEGER})
+    </select>
+
+    <!--获取所有部门-->
+    <select id="getAllDepartmentsByParentId" resultMap="DepartmentWithChildren">
+        select
+        <include refid="Base_Column_List"/>
+        from t_department
+        where parentId = #{parentId}
+    </select>
+
+</mapper>

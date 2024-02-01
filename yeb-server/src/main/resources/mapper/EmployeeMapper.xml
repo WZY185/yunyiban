@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wzy.yeb.mapper.EmployeeMapper">
+
+    <resultMap id="BaseResultMap" type="com.wzy.yeb.pojo.Employee">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="gender" column="gender" jdbcType="CHAR"/>
+            <result property="birthday" column="birthday" jdbcType="DATE"/>
+            <result property="idCard" column="idCard" jdbcType="CHAR"/>
+            <result property="wedlock" column="wedlock" jdbcType="OTHER"/>
+            <result property="nationId" column="nationId" jdbcType="INTEGER"/>
+            <result property="nativePlace" column="nativePlace" jdbcType="VARCHAR"/>
+            <result property="politicId" column="politicId" jdbcType="INTEGER"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="phone" column="phone" jdbcType="VARCHAR"/>
+            <result property="address" column="address" jdbcType="VARCHAR"/>
+            <result property="departmentId" column="departmentId" jdbcType="INTEGER"/>
+            <result property="jobLevelId" column="jobLevelId" jdbcType="INTEGER"/>
+            <result property="posId" column="posId" jdbcType="INTEGER"/>
+            <result property="engageForm" column="engageForm" jdbcType="VARCHAR"/>
+            <result property="tiptopDegree" column="tiptopDegree" jdbcType="OTHER"/>
+            <result property="specialty" column="specialty" jdbcType="VARCHAR"/>
+            <result property="school" column="school" jdbcType="VARCHAR"/>
+            <result property="beginDate" column="beginDate" jdbcType="DATE"/>
+            <result property="workState" column="workState" jdbcType="OTHER"/>
+            <result property="workId" column="workID" jdbcType="CHAR"/>
+            <result property="contractTerm" column="contractTerm" jdbcType="DOUBLE"/>
+            <result property="conversionTime" column="conversionTime" jdbcType="DATE"/>
+            <result property="notworkDate" column="notWorkDate" jdbcType="DATE"/>
+            <result property="beginContract" column="beginContract" jdbcType="DATE"/>
+            <result property="endContract" column="endContract" jdbcType="DATE"/>
+            <result property="workAge" column="workAge" jdbcType="INTEGER"/>
+            <result property="salaryId" column="salaryId" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <resultMap id="EmployeeInfo" type="com.wzy.yeb.pojo.Employee" extends="BaseResultMap">
+        <association property="nation" javaType="com.wzy.yeb.pojo.Nation">
+            <id column="nid" property="id"></id>
+            <result column="nname" property="name"></result>
+        </association>
+        <association property="politicsStatus" javaType="com.wzy.yeb.pojo.PoliticsStatus">
+            <id column="pid" property="id"></id>
+            <result column="pname" property="name"></result>
+        </association>
+        <association property="department" javaType="com.wzy.yeb.pojo.Department">
+            <id column="did" property="id"></id>
+            <result column="dname" property="name"></result>
+        </association>
+        <association property="joblevel" javaType="com.wzy.yeb.pojo.Joblevel">
+            <id column="jid" property="id"></id>
+            <result column="jname" property="name"></result>
+        </association>
+        <association property="position" javaType="com.wzy.yeb.pojo.Position">
+            <id column="posid" property="id"></id>
+            <result column="posname" property="name"></result>
+        </association>
+    </resultMap>
+
+    <resultMap id="EmployeeWithSalary" type="com.wzy.yeb.pojo.Employee" extends="BaseResultMap">
+        <association property="salary" javaType="com.wzy.yeb.pojo.Salary">
+            <id column="sid" property="id"/>
+            <result column="sbasicSalary" property="basicSalary"/>
+            <result column="sbonus" property="bonus"/>
+            <result column="slunchSalary" property="lunchSalary"/>
+            <result column="strafficSalary" property="trafficSalary"/>
+            <result column="sallSalary" property="allSalary"/>
+            <result column="spensionBase" property="pensionBase"/>
+            <result column="spensionPer" property="pensionPer"/>
+            <result column="smedicalBase" property="medicalBase"/>
+            <result column="smedicalPer" property="medicalPer"/>
+            <result column="saccumulationFundBase" property="accumulationFundBase"/>
+            <result column="saccumulationFundPer" property="accumulationFundPer"/>
+            <result column="sname" property="name"/>
+        </association>
+        <association property="department" javaType="com.wzy.yeb.pojo.Department">
+            <result column="dname" property="name"/>
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,name,gender,
+        birthday,idCard,wedlock,
+        nationId,nativePlace,politicId,
+        email,phone,address,
+        departmentId,jobLevelId,posId,
+        engageForm,tiptopDegree,specialty,
+        school,beginDate,workState,
+        workID,contractTerm,conversionTime,
+        notWorkDate,beginContract,endContract,
+        workAge,salaryId
+    </sql>
+
+    <!--获取所有员工(分页)-->
+    <select id="getEmployeeByPage" resultMap="EmployeeInfo">
+        SELECT
+        e.*,
+        n.id As nid,
+        n.`name` AS nname,
+        p.id AS pid,
+        p.`name` AS pname,
+        d.id AS did,
+        d.`name` AS dname,
+        j.id AS jid,
+        j.`name` AS jname,
+        pos.id AS posid,
+        pos.`name` AS posname
+        FROM
+        t_employee e,
+        t_nation n,
+        t_politics_status p,
+        t_department d,
+        t_joblevel j,
+        t_position pos
+        WHERE
+        e.nationId = n.id
+        AND e.politicId = p.id
+        AND e.departmentId = d.id
+        AND e.jobLevelId = j.id
+        AND e.posId = pos.id
+        <if test="null!=employee.name and ''!=employee.name">
+            AND e.name like concat('%',#{employee.name},'%')
+        </if>
+        <if test="null!=employee.politicId">
+            AND e.politicId = #{employee.politicId}
+        </if>
+        <if test="null!=employee.nationId">
+            AND e.nationId = #{employee.nationId}
+        </if>
+        <if test="null!=employee.jobLevelId">
+            AND e.jobLevelId = #{employee.jobLevelId}
+        </if>
+        <if test="null!=employee.posId">
+            AND e.posId = #{employee.posId}
+        </if>
+        <if test="null!=employee.departmentId">
+            AND e.departmentId = #{employee.departmentId}
+        </if>
+        <if test="null!=employee.engageForm and ''!=employee.engageForm">
+            AND e.engageForm = #{employee.engageForm}
+        </if>
+        <if test="null!=beginDateScope and 2==beginDateScope.length">
+            AND e.beginDate between #{beginDateScope[0]} and #{beginDateScope[1]}
+        </if>
+        ORDER BY e.id
+    </select>
+
+
+    <!--查询员工-->
+    <select id="getEmployee" resultMap="EmployeeInfo">
+        SELECT
+        e.*,
+        n.id As nid,
+        n.`name` AS nname,
+        p.id AS pid,
+        p.`name` AS pname,
+        d.id AS did,
+        d.`name` AS dname,
+        j.id AS jid,
+        j.`name` AS jname,
+        pos.id AS posid,
+        pos.`name` AS posname
+        FROM
+        t_employee e,
+        t_nation n,
+        t_politics_status p,
+        t_department d,
+        t_joblevel j,
+        t_position pos
+        WHERE
+        e.nationId = n.id
+        AND e.politicId = p.id
+        AND e.departmentId = d.id
+        AND e.jobLevelId = j.id
+        AND e.posId = pos.id
+        <if test="null!=id">
+            AND e.id = #{id}
+        </if>
+        ORDER BY e.id
+    </select>
+
+
+    <!--获取所有员工账套-->
+    <select id="getEmployeeWithSalary" resultMap="EmployeeWithSalary">
+        SELECT
+            e.*,
+            d.`name` AS dname,
+            s.id AS sid,
+            s.`name` AS sname,
+            s.basicSalary AS sbasicSalary,
+            s.trafficSalary AS strafficSalary,
+            s.lunchSalary AS slunchSalary,
+            s.bonus AS sbonus,
+            s.allSalary AS sallSalary,
+            s.pensionPer AS spensionPer,
+            s.pensionBase AS spensionBase,
+            s.medicalPer AS smedicalPer,
+            s.medicalBase AS smedicalBase,
+            s.accumulationFundPer AS saccumulationFundPer,
+            s.accumulationFundBase AS saccumulationFundBase
+        FROM
+            t_employee AS e
+            LEFT JOIN t_salary AS s ON e.salaryId = s.id
+            LEFT JOIN t_department AS d ON e.departmentId = d.id
+        ORDER BY
+            e.id
+    </select>
+</mapper>
